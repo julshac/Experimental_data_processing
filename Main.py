@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 from Graphics.Painting import vector, histogram, distribution
-from Additions.Randoms import selfRand, randNum, normNum
+from Additions.Randoms import selfRand, randNum, normNum, stationaryProcess, stats
 from Additions.Shifts import peaks, shift
 from Graphics.Figures import fig_1, fig_2, fig_3, fig_4
 
@@ -39,7 +39,9 @@ if __name__ == "__main__":
     alp = random.uniform(0, 1)
     bet = random.uniform(0, 1)
     x = np.arange(0, N, 10)
-    first_task(x, k, b, alp, bet)
-    second_task(x, N)
+#    first_task(x, k, b, alp, bet)
+#    second_task(x, N)
+#   print(stationaryProcess(x, 10))
+    print(stats(x))
 
 

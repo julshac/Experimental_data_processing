@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
-import numpy as np
 
 
 def vector(x, desc, xlabel="x", ylabel="f(x)"):
@@ -21,7 +20,6 @@ def histogram(x, desc):
 
 
 def distribution(x, desc):
-    sns.set(color_codes=True)
     sns.distplot(x)
     plt.title(desc)
     plt.xlabel("x")
