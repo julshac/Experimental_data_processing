@@ -3,25 +3,26 @@ import random
 import time
 
 
-def stats(x):
-    mean = x.mean()
-    std = x.std()
-    var = x.var()
+def stats(x, per):
+    mean = []
+    var = []
+    for i in stationaryProcess(x, per):
+        mean.append(np.mean(i))
+        var.append(np.var(i))
     return {'Среднее арифметическое': mean,
-            'Среднеквадратическое отклонение': std,
             'Дисперсия случайной величины': var}
-
-
-def normNum(x, s):
-    return [(((xx - min(x))/(max(x) - min(x))) - 0.5) * 2 * s for xx in x]
 
 
 def stationaryProcess(x, per):
     n = len(x)
     res = []
     for i in range(per):
-        res.append(x[i * (n / per):((i + 1) * (n / per))])
+        res.append(x[i * int(n / per):((i + 1) * int(n / per))])
     return res
+
+
+def normNum(x, s):
+    return [(((xx - min(x))/(max(x) - min(x))) - 0.5) * 2 * s for xx in x]
 
 
 def randNum(x, N):

@@ -20,7 +20,7 @@ def second_task(x, n):
     vector(normNum(randNum(x, n), 1), 'Random numbers')
     vector(normNum(selfRand(x), 1), 'Self random numbers')
     distribution(normNum(randNum(x, n), 1), 'Random numbers trend')
-    distribution(normNum(selfRand(x), 1), 'Random numbers trend')
+    distribution(normNum(selfRand(x), 1), 'Self random numbers trend')
 
 
 def third_task(x, n):
@@ -39,9 +39,8 @@ if __name__ == "__main__":
     alp = random.uniform(0, 1)
     bet = random.uniform(0, 1)
     x = np.arange(0, N, 10)
-#    first_task(x, k, b, alp, bet)
-#    second_task(x, N)
-#   print(stationaryProcess(x, 10))
-    print(stats(x))
+#   first_task(x, k, b, alp, bet)
+#   second_task(x, N)
+    print(stats(normNum(randNum(x, N), 1), 10))
 
 
