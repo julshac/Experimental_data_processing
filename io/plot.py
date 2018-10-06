@@ -11,8 +11,8 @@ def vector(x, desc, xlabel="x", ylabel="f(x)"):
     plt.show()
 
 
-def histogram(x, desc):
-    plt.hist(x)
+def histogram(x, desc, m):
+    plt.hist(x, bins=m)
     plt.title(desc)
     plt.xlabel("x")
     plt.ylabel("f(x)")
