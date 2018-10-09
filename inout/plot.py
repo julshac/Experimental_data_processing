@@ -11,8 +11,8 @@ def vector(x, desc, xlabel="x", ylabel="f(x)"):
     plt.show()
 
 
-def histogram(x, desc, m):
-    plt.hist(x, bins=m)
+def histogram(x, desc):
+    plt.hist(x)
     plt.title(desc)
     plt.xlabel("x")
     plt.ylabel("f(x)")
@@ -20,7 +20,7 @@ def histogram(x, desc, m):
 
 
 def distribution(x, desc):
-    sns.distplot(x)
+    sns.distplot(x, bins=100, norm_hist=0, kde=0)
     plt.title(desc)
     plt.xlabel("x")
     plt.ylabel("f(x)")
