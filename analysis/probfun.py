@@ -14,7 +14,7 @@ def _average(x):
 
 
 def _variance(x):
-    return _sum(x, 2, _average(x)) / len(x)
+    return (x**2).sum() / len(x)
 
 
 #   root mean square

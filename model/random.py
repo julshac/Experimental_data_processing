@@ -1,15 +1,17 @@
-import random
+import numpy as np
 import time
 
 
 def normNum(x, s):
-    return [(((xx - min(x))/(max(x) - min(x))) - 0.5) * 2 * s for xx in x]
+    return (((x - min(x))/(max(x) - min(x))) - 0.5) * 2 * s
 
 
-def randNum(x):
-    return [random.random() for xx in x]
+def randNum(n):
+    return np.random.sample(n)
 
 
-def selfRand(x):
-    return [hash(time.clock() / (1 + xx)) for xx in x]
+def selfRand(N):
+    x = np.random.randint(0, 100, N) #np.arange(0, N)
+    #return np.log(hash(time.clock()), x)
+    return x
 

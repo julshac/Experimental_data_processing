@@ -1,6 +1,5 @@
 import numpy as np
-import math
-from analysis.probfun import _deviation, _skewness, _kurtosis, _rms, _variance, _average, _error, _gamma
+from analysis.probfun import _deviation, _skewness, _kurtosis, _rms, _variance, _average, _error, _gamma, _sum
 
 
 def spacing(x, per):
@@ -11,26 +10,30 @@ def spacing(x, per):
     return res
 
 
-def stationarity(x, per, perc=0.5):
-    mean = [_average(i) for i in spacing(x, per)]
-    var = [_variance(i) for i in spacing(x, per)]
+def stationarity(x, per, perc=0.01):
+    means = np.zeros(per)
+    var = np.zeros(per)
+    length_of_int = len(x)//per
+    for i in range(per):
+        means[i] = x[i * length_of_int:(i + 1) * length_of_int].mean()
+        var[i] = x[i * length_of_int:(i + 1) * length_of_int].std()
     stat = True
-    for m in mean:
-        if abs(m - _average(mean)) > _average(mean) * perc:
-           print("Ошибочное среднее значение  {}, при {} > {}".format(m, abs(m - _average(mean)),
-                                                                        _average(mean) * perc))
+    for m in means:
+        if abs(m - means.mean()) > abs(means.mean()) * perc:
+           print("Ошибочное среднее значение  {}, при {} > {}".format(m, abs(m - means.mean()),
+                                                                        abs(means.mean()) * perc))
            stat = False
     for v in var:
-        if abs(v - _average(var)) > _average(mean) * perc:
-           print("Ошибочное значение дисперсии {}, при {} > {}".format(v, abs(v - _average(var)),
-                                                             _average(var) * perc))
+        if abs(v - var.mean()) > abs(var.mean()) * perc:
+           print("Ошибочное значение дисперсии {}, при {} > {}".format(v, abs(v - var.mean()),
+                                                                       abs(var.mean()) * perc))
            stat = False
     print("Стационарен ли процесс? {}".format(stat))
     print("Стредние значения:")
-    print(mean)
+    print(means)
     print("Дисперсии:")
     print(var)
-    # print('СКО средних значений по 10 замерам: {0}'.format(np.mean(mean)))
+    # print('СКО средних значений по 10 замерам: {0}'.format(np.means(means)))
     # print('СКО дисперсий по 10 замерам: {0}'.format(np.var(var)))
 
 
@@ -58,14 +61,55 @@ def per_statistics(rnd, per):
     print('Гамма 2: {0}'.format(np.std([_gamma(_skewness(i), _deviation(i), 4, 3) for i in spacing(rnd, per)])))
 
 
-def covariance(x):
-    return np.cov(x)
+#ллинейный коэффициент корреляции Rxx
+def rxx(x, y, shift):
+    tmp = 0
+    for i in range(len(x) - shift):
+        tmp += ((x[i] - x.mean())*(y[i + shift] - y.mean()))
+    return tmp
 
 
-def correlation(rnd, srnd):
-    return np.correlate(rnd, srnd, mode='full')
+def covariance(x, y, shift):
+    return rxx(x, y, shift) / len(x)
 
 
-def autocorrelation(rnd):
-    auto = correlation(rnd, rnd)
-    return auto[auto.size//2:]
+def correlation(x, y, shift):
+    return rxx(x, y, shift) / _deviation(x)
+#    return np.correlate(rnd, srnd, mode='full')
+
+
+#Гармонический процесс
+def harmonic_motion(x, a, f, t):
+    return a * np.sin(2 * np.pi * f * x * t)
+
+
+#Преобразование Фурье
+def fourier_transform(x, N):
+    cs = []
+    cn = []
+    # x = list(map(float, x))
+    for n in range(0, N):
+        re = 0
+        im = 0
+        for k in range(N):
+            re += x[k] * np.cos((2 * np.pi * n * k) / N)
+            im += x[k] * np.sin((2 * np.pi * n * k) / N)
+        re /= N
+        im /= N
+        cs.append(re + im)
+        cn.append(np.sqrt(re ** 2 + im ** 2))
+    return cs, cn
+
+
+#Обратное преобразование Фурье
+def inverse_fourier_transform(cs, N):
+    xk = []
+    for n in range(0, N):
+        re = 0
+        im = 0
+        for k in range(N):
+            re += cs[k] * np.cos((2 * np.pi * n * k) / N)
+            im += cs[k] * np.sin((2 * np.pi * n * k) / N)
+        xk.append(re + im)
+    return xk
+
