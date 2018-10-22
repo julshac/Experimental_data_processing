@@ -2,8 +2,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-def vector(x, desc, xlabel="x", ylabel="f(x)"):
-    plt.plot(x)
+def plot(x, y=None, desc="", xlabel="x", ylabel="f(x)"):
+    if y is None:
+        plt.plot(x)
+    else:
+        plt.plot(x, y)
     plt.grid()
     plt.title(desc)
     plt.xlabel(xlabel)

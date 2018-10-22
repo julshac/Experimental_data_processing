@@ -42,5 +42,5 @@ def _sum(x, power, temp):
     return sm
 
 
-def sin(a, f, dt):
-    return lambda t: a * math.sin(2 * math.pi * f * dt * t)
+def sin(a, f):
+    return lambda t: a * math.sin(2 * math.pi * f * t)
