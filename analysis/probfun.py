@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 
 def _deviation(x):
@@ -39,3 +40,7 @@ def _sum(x, power, temp):
     for i in x:
         sm += (i - temp) ** power
     return sm
+
+
+def sin(a, f, dt):
+    return lambda t: a * math.sin(2 * math.pi * f * dt * t)

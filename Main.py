@@ -2,10 +2,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 from inout.plot import vector, distribution
+from inout.fopen import dat_values
 from model.random import selfRand, randNum, normNum
 from model.shifts import peaks, shift
 from model.trend import linear, expon
-from analysis.stats import stationarity, statistics, correlation, harmonic_motion, fourier_transform, inverse_fourier_transform
+from analysis.probfun import sin
+from analysis.stats import stationarity, statistics, correlation, harmonic_motion, fourier_transform,\
+                           inverse_fourier_transform
 
 
 def first_task(x, k, b, alp, bet):
@@ -61,6 +64,18 @@ def sixth_task(x, N):
     vector(ift, 'Обратное преобразование Фурье')
 
 
+def seventh_task(dt, n):
+    xarr = dat_values()
+    xt = np.zeros(n)
+    f1 = sin(15, 3, dt)
+    f2 = sin(100, 37, dt)
+    f3 = sin(25, 137, dt)
+    for (i, t) in zip(range(n), xarr):
+        xt[i] = f1(t) + f2(t) + f3(t)
+    ft = fourier_transform(xt, n)
+    vector([i * ft[1] for i in range(n)], 'Полигармонический процесс')
+
+
 if __name__ == "__main__":
     fig = plt.figure(1)
     N = 1000
@@ -75,5 +90,5 @@ if __name__ == "__main__":
     # third_task(x, rnd)
     # fourth_task(N)
     # fifth_task(N)
-    sixth_task(x, N)
-
+    # sixth_task(x, N)
+    seventh_task(0.002, N)
