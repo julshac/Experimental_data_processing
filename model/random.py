@@ -1,5 +1,6 @@
 import numpy as np
 import time
+import math
 
 
 def normNum(x, s):
@@ -10,8 +11,9 @@ def randNum(n):
     return np.random.sample(n)
 
 
-def selfRand(N):
-    x = np.random.randint(0, 100, N) #np.arange(0, N)
-    #return np.log(hash(time.clock()), x)
+def selfRand(n):
+    x = np.zeros(n)
+    for i in range(n):
+        x[i] = np.log(hash(time.clock()))*np.sin(i)
     return x
 

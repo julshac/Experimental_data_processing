@@ -5,4 +5,6 @@ import numpy as np
 def dat_values():
     # p = Popen("pgp_1ms.dat", cwd=r"C:\OSPanel\Works")
     # stdout, stderr = p.communicate()
-    return np.fromfile("data/pgp_1ms.dat", dtype=float)
+    a = np.fromfile("data/pgp_1ms.dat", dtype=np.float32)
+    print(a)
+    return a
