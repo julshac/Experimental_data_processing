@@ -2,16 +2,17 @@ import numpy as np
 import time
 
 
-def normNum(x, s):
-    return (((x - min(x))/(max(x) - min(x))) - 0.5) * 2 * s
+def normalize(numbers: np.array, normalization_bound: int) -> np.array:
+    return (((numbers - min(numbers)) / (max(numbers) - min(numbers))) - 0.5) * 2 * normalization_bound
 
 
-def randNum(n):
-    return np.random.sample(n)
+def numpy_random(count: int) -> np.array:
+    return np.random.sample(count)
 
 
-def selfRand(N):
-    x = np.random.randint(0, 100, N) #np.arange(0, N)
-    #return np.log(hash(time.clock()), x)
+def my_random(count) -> np.array:
+    x = np.zeros(count)
+    for i in range(count):
+        x[i] = np.log(hash(time.clock())) * np.sin(i)
     return x
 
