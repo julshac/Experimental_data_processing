@@ -105,6 +105,8 @@ def eighteen_task(x, n):
     plot(exponential_autocorrelation, desc='Автокорреляция экспоненциальной ф-ции')
 
 
+
+
 if __name__ == "__main__":
     fig = plt.figure(1)
     N = 1000
