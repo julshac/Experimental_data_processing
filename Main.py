@@ -45,21 +45,27 @@ def fifth_task(n):
     tmp = np.zeros(100)
     for i in range(0, 100):
         tmp[i] = correlation(normalize(numpy_random(n), 1), normalize(numpy_random(n), 1), i)
+    plt.subplot(211)
     plot(tmp, desc='Взаимная корреляционная ф-ция')
     tmp = np.zeros(100)
     for i in range(0, 100):
         a = normalize(numpy_random(n), 1)
         tmp[i] = correlation(a, a, i)
+    plt.subplot(212)
     plot(tmp, desc='Автокорреляционная ф-ция')
+    plt.show()
 
 
-def sixth_task(x, n, dt):
+def sixth_task(x, n):
     harm = harmonic_motion(x, 100, 37, 0.002)
     plot(harm, desc='Гармонический процесс')  # 3, 37, 137, 237, 337 [Гц]
     ft = fourier_transform(harm, n)
+    plt.subplot(211)
     plot([xx * 0.5 for xx in range(0, len(ft[1]) // 2)], ft[1][:len(ft[1]) // 2], desc='Преобразование Фурье')
     ift = inverse_fourier_transform(ft[0], n)
+    plt.subplot(212)
     plot(ift, desc='Обратное преобразование Фурье')
+    plt.show()
 
     #данные из файла dat
     xarr = dat_values()
@@ -72,10 +78,13 @@ def sixth_task(x, n, dt):
     # ft = fourier_transform(xt, n)
     harm = harmonic_motion(xarr, 100, 37, 0.002)
     plot(harm, desc='Гармонический процесс')  # 3, 37, 137, 237, 337 [Гц]
+    plt.subplot(211)
     ft = fourier_transform(xarr, n)
     plot([xx * 0.5 for xx in range(0, len(ft[1]) // 2)], ft[1][:len(ft[1]) // 2], desc='Преобразование Фурье')
+    plt.subplot(212)
     ift = inverse_fourier_transform(ft[0], N)
     plot([xx * 0.5 for xx in range(0, len(ift) // 2)], ift[:len(ift) // 2], desc='Обратное преобразование Фурье')
+    plt.show()
 
 
 def seventh_task(x, n):
@@ -87,29 +96,47 @@ def seventh_task(x, n):
         harmonic_autocorrelation[i] = correlation(harm, harm, i)
         linear_autocorrelation[i] = correlation(linear(1.3, x, 10000), linear(1.3, x, 10000), i)
         exponential_autocorrelation[i] = correlation(expon(0.0016, x), expon(0.0016, x), i)
-    # plot(tmp, desc='Автокорреляция гармонического процесса')
-    # distribution(harm, desc='Плотность вероятности гармонического процесса')
+    plt.subplot(211)
+    plot(harmonic_autocorrelation, desc='Автокорреляция гармонического процесса')
+    plt.subplot(212)
+    distribution(harm, desc='Плотность вероятности гармонического процесса')
+    plt.show()
     ft = fourier_transform(shift(my_random(n), 0), n)
+    plt.subplot(211)
     plot(ft[1], desc='Преобразование Фурье для случайного набора')
     ift = inverse_fourier_transform(ft[0], N)
+    plt.subplot(212)
     plot(ift, desc='Обратное преобразование Фурье для случайного набора')
     # нет зависимостей от количества пиков
-    plot(peaks(0.001, 5, np.zeros(len(harm))), desc='Peaks for zero function')
-    plot(harm, desc='Процесс')
+    plt.show()
+    plot(harm, desc='Полигармонический процесс')
+    plt.show()
     # бесокнечный набор синусов и косинусов даст 1.
+    plt.subplot(211)
     distribution(linear(1.3, x, 10000), desc='Плотность вероятности линейной ф-ции')
+    plt.subplot(212)
     distribution(expon(0.0016, x), desc='Плотность вероятности экспоненциальной ф-ции')
+    plt.show()
+    plt.subplot(211)
     plot(linear_autocorrelation, desc='Автокорреляция линейной ф-ции')
+    plt.subplot(212)
     plot(exponential_autocorrelation, desc='Автокорреляция экспоненциальной ф-ции')
+    plt.show()
 
 
-def eighteen_task(x):
+def eight_task(x):
     harm = harmonic_motion(x, 100, 37, 0.002)
     xk = np.zeros(len(harm))
+    plt.subplot(211)
     plot(shift(harm, 100), desc='Shift')
+    plt.subplot(212)
     plot(reverse_shift(harm), desc='Anti-shift')
-    plot(peaks(0.01, 5, xk), desc='Peaks for zero function')
+    plt.show()
+    plt.subplot(211)
+    plot(peaks(0.002, 5, xk), desc='Peaks for zero function')
+    plt.subplot(212)
     plot(remove_peaks(xk), desc='Remove peaks for zero function')
+    plt.show()
 
 
 if __name__ == "__main__":
@@ -127,5 +154,5 @@ if __name__ == "__main__":
     # fourth_task(N)
     # fifth_task(N)
     # sixth_task(x, N)
-    # seventh_task(0.002, N)
-    eighteen_task(x)
+    seventh_task(x, N)
+    # eight_task(x)
