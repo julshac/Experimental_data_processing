@@ -6,6 +6,13 @@ def _deviation(x):
     return np.sqrt(_variance(x))
 
 
+def _subtraction_for_correlation(x):
+    t = 0
+    for i in range(len(x)):
+        t += (x[i] - x.mean()) ** 2
+    return t
+
+
 def _error(x):
     return np.sqrt(_rms(x))
 

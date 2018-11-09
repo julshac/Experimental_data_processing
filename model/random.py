@@ -1,5 +1,6 @@
 import numpy as np
 import time
+import datetime as dt
 
 
 def normalize(numbers: np.array, normalization_bound: int) -> np.array:
@@ -11,8 +12,6 @@ def numpy_random(count: int) -> np.array:
 
 
 def my_random(count) -> np.array:
-    x = np.zeros(count)
-    for i in range(count):
-        x[i] = np.log(hash(time.clock())) * np.sin(i)
-    return x
+    core = np.random.normal(size=(count, 1))
+    return np.log(np.sin(hash(core)))
 

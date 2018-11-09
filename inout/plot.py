@@ -1,10 +1,9 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
-import numpy as np
 
 
 def plot(x, y=None, desc="", xlabel="x", ylabel="f(x)"):
-    if y is None:
+    if y == None:
         plt.plot(x)
     else:
         plt.plot(x, y)

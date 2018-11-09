@@ -1,5 +1,6 @@
 import numpy as np
-from analysis.probfun import _deviation, _skewness, _kurtosis, _rms, _variance, _average, _error, _gamma, _sum
+from analysis.probfun import _deviation, _skewness, _kurtosis, _rms, _variance, _average, _error,\
+                             _gamma, _subtraction_for_correlation
 
 
 def spacing(x, per):
@@ -61,7 +62,7 @@ def per_statistics(rnd, per):
     print('Гамма 2: {0}'.format(np.std([_gamma(_skewness(i), _deviation(i), 4, 3) for i in spacing(rnd, per)])))
 
 
-#ллинейный коэффициент корреляции Rxx
+#линейный коэффициент корреляции Rxx
 def rxx(x, y, shift):
     tmp = 0
     for i in range(len(x) - shift):
@@ -74,8 +75,7 @@ def covariance(x, y, shift):
 
 
 def correlation(x, y, shift):
-    return rxx(x, y, shift) / _deviation(x)
-#    return np.correlate(rnd, srnd, mode='full')
+    return rxx(x, y, shift) / _subtraction_for_correlation(x)
 
 
 #Гармонический процесс
