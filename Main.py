@@ -145,7 +145,8 @@ def eight_task(x):
 def nine_task(x, n):
     gs = gr.GridSpec(3, 3)
     m = [1, 2, 3, 10, 50, 100]
-    harm = harmonic_motion(x, 10, 5, 0.002)
+    s = 5
+    harm = harmonic_motion(x, 5, s/20, 0.002)
     noise = normalize(numpy_random(n), 2)
     plt.subplot(gs[0, :])
     plot(harm, desc='Гармонический сигнал')
@@ -154,23 +155,27 @@ def nine_task(x, n):
     plt.subplot(gs[2, :])
     plot(noise + harm, desc='Гармонический сигнал с шумами')
     plt.show()
-    realisations = np.zeros((6, n))
-    for index, i in enumerate(m):
-        realisations[index] = (noise + harm) * i
-    plt.subplot(gs[0, 0])
-    plot(realisations[0], desc='M = 1')
-    plt.subplot(gs[0, 1])
-    plot(realisations[1], desc='M = 2')
-    plt.subplot(gs[0, 2])
-    plot(realisations[2], desc='M = 3')
-    plt.subplot(gs[1, 0])
-    plot(realisations[3], desc='M = 10')
-    plt.subplot(gs[1, 1])
-    plot(realisations[4], desc='M = 50')
-    plt.subplot(gs[1, 2])
-    plot(realisations[5], desc='M = 100')
-    plt.subplot(gs[2, :])
-    plot(realisations, desc='All')
+
+    gs = gr.GridSpec(6, 6)
+    realisation = np.zeros(1000)
+    # for index, i in enumerate(m):
+    j = 0
+    # for i in m:
+    #     realisation += numpy_random(n)
+    #     plt.subplot(gs[j, :])
+    #     j += 1
+    #     realisation /= i
+    #     plot(realisation, desc='M = ' + str(i))
+    #     print('M = ' + str(i) + ', std: ' + str(np.std(realisation)))
+    # plt.show()
+
+    for i in m:
+        realisation += normalize(numpy_random(n), s) + harm
+        plt.subplot(gs[j, :])
+        j += 1
+        realisation /= i
+        plot(realisation, desc='M = ' + str(i))
+        print('M = ' + str(i) + ', std: ' + str(np.std(realisation)))
     plt.show()
 
 
