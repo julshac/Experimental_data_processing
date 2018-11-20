@@ -1,3 +1,4 @@
+from numba import jit
 import numpy as np
 from analysis.probfun import _deviation, _skewness, _kurtosis, _rms, _variance, _average, _error,\
                              _gamma, _subtraction_for_correlation
@@ -79,26 +80,33 @@ def correlation(x, y, shift):
 
 
 #Гармонический процесс
-def harmonic_motion(x, a, f, t):
+def harmonic_motion(n, a, f, t):
+    x = np.arange(n)
     return a * np.sin(2 * np.pi * f * x * t)
 
 
 #Преобразование Фурье
+@jit()
 def fourier_transform(x, N):
-    cs = []
-    cn = []
+    re = np.zeros(N)
+    im = np.zeros(N)
     # x = list(map(float, x))
-    for n in range(0, N):
-        re = 0
-        im = 0
-        for k in range(N):
-            re += x[k] * np.cos((2 * np.pi * n * k) / N)
-            im += x[k] * np.sin((2 * np.pi * n * k) / N)
-        re /= N
-        im /= N
-        cs.append(re + im)
-        cn.append(np.sqrt(re ** 2 + im ** 2))
-    return cs, cn
+    for n in range(N):
+        re[n], im[n] = fourier_step(x, N, n)
+    re /= N
+    im /= N
+    cs = (re + im)
+    cn = (np.sqrt(re ** 2 + im ** 2))
+    return cs, cn[:len(cn) // 2]
+
+
+@jit()
+def fourier_step(x, N, n):
+    re, im = 0, 0
+    for k in range(N):
+        re += x[k] * np.cos((2 * np.pi * n * k) / N)
+        im += x[k] * np.sin((2 * np.pi * n * k) / N)
+    return re, im
 
 
 #Обратное преобразование Фурье

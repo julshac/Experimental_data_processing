@@ -2,14 +2,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 import matplotlib.gridspec as gr
-from inout.plot import plot, distribution
-from inout.fopen import dat_values
-from model.random import my_random, numpy_random, normalize
-from model.shifts import peaks, shift, reverse_shift, remove_peaks
-from model.trend import linear, expon
-from analysis.probfun import sin
-from analysis.stats import stationarity, statistics, correlation, harmonic_motion, fourier_transform,\
-                           inverse_fourier_transform
+from inout.plot import *
+from inout.fopen import *
+from model.random import *
+from model.shifts import *
+from model.trend import *
+from analysis.probfun import *
+from analysis.stats import *
 
 
 def first_task(x, k, b, alp, bet):
@@ -145,7 +144,7 @@ def eight_task(x):
 def nine_task(x, n):
     gs = gr.GridSpec(3, 3)
     m = [1, 2, 3, 10, 50, 100]
-    s = 5
+    s = 100
     harm = harmonic_motion(x, 5, s/20, 0.002)
     noise = normalize(numpy_random(n), 2)
     plt.subplot(gs[0, :])
@@ -169,13 +168,66 @@ def nine_task(x, n):
     #     print('M = ' + str(i) + ', std: ' + str(np.std(realisation)))
     # plt.show()
 
-    for i in m:
+    for i in range(m):
         realisation += normalize(numpy_random(n), s) + harm
         plt.subplot(gs[j, :])
         j += 1
         realisation /= i
         plot(realisation, desc='M = ' + str(i))
         print('M = ' + str(i) + ', std: ' + str(np.std(realisation)))
+    plt.show()
+
+
+#   120 - фаза сжимания сердца
+def ten_task(x, m):
+    gs = gr.GridSpec(3, 2)
+    heart = heartbeat()
+    card = cardiography(m)
+    conv = convolution(heart, card)
+    ft_h = fourier_transform(heart, len(heart))
+    ft_c = fourier_transform(card, len(card))
+    ft_con = fourier_transform(conv, len(conv))
+#   тики раз в секунду: 110-130
+    plt.subplot(gs[0, 0])
+    plot(heart, desc='Биение сердца')
+    plt.subplot(gs[0, 1])
+    plot(ft_h[1][:len(ft_h[1]) // 2], desc='Fourier for heartbeat')
+    plt.subplot(gs[1, 0])
+    plot(card, desc='Кардиограмма')
+    plt.subplot(gs[1, 1])
+    plot(ft_c[1][:len(ft_c[1]) // 2], desc='Fourier for cardiograpthy')
+    plt.subplot(gs[2, 0])
+    plot(conv, desc='Свертка')
+    plt.subplot(gs[2, 1])
+    plot(ft_con[1][:len(ft_con[1]) // 2], desc='Fourier for convolution') #cs vs cn ??
+    plt.show()
+
+
+def eleven_task(dt=0.002, m=128, fcut=16.32):
+    gs = gr.GridSpec(2, 3)
+    _sum_harm = harmonic_motion(1000, a=10, f=150, t=0.001) + harmonic_motion(1000, a=10, f=50, t=0.001)
+    lpF = low_pass_filter(fcut=fcut)
+    conv = convolution(_sum_harm, lpF)
+    ft_sh = fourier_transform(_sum_harm, len(_sum_harm))
+    ft_con = fourier_transform(conv, len(conv))
+    ft_lpF = fourier_transform(lpF, len(lpF))
+    plt.subplot(gs[0, 0])
+    plot(_sum_harm, desc='Сумма гармоник')
+    plt.subplot(gs[0, 1])
+    plot(conv, desc='Свертка от суммы и фильтра')
+    plt.subplot(gs[0, 2])
+    plot(lpF, desc='ФНЧ')
+    plt.subplot(gs[1, 0])
+    plot(ft_sh[1], desc='Фурье от суммы гармоник')
+    plt.subplot(gs[1, 1])
+    plot(ft_con[1], desc='Фурье от свертки')
+    plt.subplot(gs[1, 2])
+    plot(ft_lpF[1] * 2 * m, desc='Частотная характеристика')
+    plt.show()
+
+
+def twelve_task():
+    plot(wav_values(), desc='Запись')
     plt.show()
 
 
@@ -196,4 +248,7 @@ if __name__ == "__main__":
     # sixth_task(x, N)
     # seventh_task(x, N)
     # eight_task(x)
-    nine_task(x, N)
+    # nine_task(x, N)
+    # ten_task(x, 200)
+    # eleven_task(x, fcut=10)
+    twelve_task()
