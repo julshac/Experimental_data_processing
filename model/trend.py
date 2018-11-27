@@ -1,4 +1,5 @@
 import numpy as np
+from numba import jit
 from model.shifts import peaks
 import math
 import random
@@ -35,6 +36,7 @@ def convolution(x, h):
     return y[:-len(h)]
 
 
+@jit()
 def low_pass_filter(m=128, fcut=15, dt=0.002):
     const = [0.35577019, 0.23469830, 0.07211497, 0.00630165]
     lpW = np.zeros(m + 1)
@@ -53,4 +55,28 @@ def low_pass_filter(m=128, fcut=15, dt=0.002):
         lpW[i] *= sum
         sumg += 2 * lpW[i]
     lpW /= sumg
-    return np.append(lpW[::-1], lpW[1:]) # * 2 * m
+    return np.append(lpW[::-1], lpW[1:]) #* 2 * m
+
+
+def high_pass_filter(m=128, fcut=15, dt=0.002):
+    lpW = low_pass_filter(m, fcut, dt)
+    hpW = - lpW
+    hpW[m] = 1 - lpW[m]
+    return hpW
+
+
+@jit()
+def band_pass_filter(f1, f2, m=128, dt=0.002):
+    lpW1 = low_pass_filter(m, f1, dt)
+    lpW2 = low_pass_filter(m, f2, dt)
+    bpW = lpW2 - lpW1
+    return bpW
+
+
+@jit()
+def band_stop_filter(f1, f2, m=128, dt=0.002):
+    lpW1 = low_pass_filter(m, f1, dt)
+    lpW2 = low_pass_filter(m, f2, dt)
+    bsW = lpW2 - lpW1
+    bsW[m] = 1 + lpW2[m] - lpW1[m]
+    return bsW

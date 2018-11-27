@@ -226,7 +226,37 @@ def eleven_task(dt=0.002, m=128, fcut=16.32):
     plt.show()
 
 
-def twelve_task():
+def twelve_task(dt=0.002, m=128, fcut=15):
+    gs = gr.GridSpec(2, 4)
+    _sum_harm = harmonic_motion(1000, a=10, f=150, t=0.001) + harmonic_motion(1000, a=10, f=50, t=0.001)
+    lpF = low_pass_filter(fcut=fcut)
+    hpF = high_pass_filter(fcut=fcut)
+    bpF = band_pass_filter(15, 10)
+    bsF = band_stop_filter(15, 10)
+    ft_lpF = fourier_transform(lpF, len(lpF))
+    ft_hpF = fourier_transform(hpF, len(hpF))
+    ft_bpF = fourier_transform(bpF, len(bpF))
+    ft_bsF = fourier_transform(bsF, len(bsF))
+    plt.subplot(gs[0, 0])
+    plot(lpF, desc='ФНЧ')
+    plt.subplot(gs[0, 1])
+    plot(hpF, desc='ФВЧ')
+    plt.subplot(gs[0, 2])
+    plot(bpF, desc='ПВЧ')
+    plt.subplot(gs[0, 3])
+    plot(bsF, desc='РФ')
+    plt.subplot(gs[1, 0])
+    plot(ft_lpF[1] * 2 * m, desc='Частотная хар-ка ФНЧ')
+    plt.subplot(gs[1, 1])
+    plot(ft_hpF[1] * 2 * m, desc='Частотная хар-ка ФВЧ')
+    plt.subplot(gs[1, 2])
+    plot(ft_bpF[1] * 2 * m, desc='Частотная хар-ка ПВЧ')
+    plt.subplot(gs[1, 3])
+    plot(ft_bsF[1] * 2 * m, desc='Частотная хар-ка РФ')
+    plt.show()
+
+
+def thirdy_task():
     plot(wav_values(), desc='Запись')
     plt.show()
 
