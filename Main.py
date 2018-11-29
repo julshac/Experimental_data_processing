@@ -141,11 +141,11 @@ def eight_task(x):
     plt.show()
 
 
-def nine_task(x, n):
+def nine_task(n):
     gs = gr.GridSpec(3, 3)
     m = [1, 2, 3, 10, 50, 100]
     s = 100
-    harm = harmonic_motion(x, 5, s/20, 0.002)
+    harm = harmonic_motion(n, 5, s/20, 0.002)
     noise = normalize(numpy_random(n), 2)
     plt.subplot(gs[0, :])
     plot(harm, desc='Гармонический сигнал')
@@ -157,23 +157,13 @@ def nine_task(x, n):
 
     gs = gr.GridSpec(6, 6)
     realisation = np.zeros(1000)
-    # for index, i in enumerate(m):
     j = 0
-    # for i in m:
-    #     realisation += numpy_random(n)
-    #     plt.subplot(gs[j, :])
-    #     j += 1
-    #     realisation /= i
-    #     plot(realisation, desc='M = ' + str(i))
-    #     print('M = ' + str(i) + ', std: ' + str(np.std(realisation)))
-    # plt.show()
-
-    for i in range(m):
+    for i in m:
+        # plt.subplot(gs[j, :])
         realisation += normalize(numpy_random(n), s) + harm
-        plt.subplot(gs[j, :])
-        j += 1
         realisation /= i
         plot(realisation, desc='M = ' + str(i))
+        j += 1
         print('M = ' + str(i) + ', std: ' + str(np.std(realisation)))
     plt.show()
 
@@ -231,8 +221,8 @@ def twelve_task(dt=0.002, m=128, fcut=15):
     _sum_harm = harmonic_motion(1000, a=10, f=150, t=0.001) + harmonic_motion(1000, a=10, f=50, t=0.001)
     lpF = low_pass_filter(fcut=fcut)
     hpF = high_pass_filter(fcut=fcut)
-    bpF = band_pass_filter(15, 10)
-    bsF = band_stop_filter(15, 10)
+    bpF = band_pass_filter(10, 30)
+    bsF = band_stop_filter(10, 30)
     ft_lpF = fourier_transform(lpF, len(lpF))
     ft_hpF = fourier_transform(hpF, len(hpF))
     ft_bpF = fourier_transform(bpF, len(bpF))
@@ -246,17 +236,18 @@ def twelve_task(dt=0.002, m=128, fcut=15):
     plt.subplot(gs[0, 3])
     plot(bsF, desc='РФ')
     plt.subplot(gs[1, 0])
+    #исправить вывод
     plot(ft_lpF[1] * 2 * m, desc='Частотная хар-ка ФНЧ')
     plt.subplot(gs[1, 1])
     plot(ft_hpF[1] * 2 * m, desc='Частотная хар-ка ФВЧ')
     plt.subplot(gs[1, 2])
     plot(ft_bpF[1] * 2 * m, desc='Частотная хар-ка ПВЧ')
     plt.subplot(gs[1, 3])
-    plot(ft_bsF[1] * 2 * m, desc='Частотная хар-ка РФ')
+    plot(ft_bsF[1], desc='Частотная хар-ка РФ')
     plt.show()
 
 
-def thirdy_task():
+def thirteen_task():
     plot(wav_values(), desc='Запись')
     plt.show()
 
@@ -278,7 +269,7 @@ if __name__ == "__main__":
     # sixth_task(x, N)
     # seventh_task(x, N)
     # eight_task(x)
-    # nine_task(x, N)
+    nine_task(N)
     # ten_task(x, 200)
     # eleven_task(x, fcut=10)
-    twelve_task()
+    # twelve_task()
