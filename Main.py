@@ -143,29 +143,31 @@ def eight_task(x):
 
 def nine_task(n):
     gs = gr.GridSpec(3, 3)
-    m = [1, 2, 3, 10, 50, 100]
-    s = 100
-    harm = harmonic_motion(n, 5, s/20, 0.002)
-    noise = normalize(numpy_random(n), 2)
-    plt.subplot(gs[0, :])
-    plot(harm, desc='Гармонический сигнал')
-    plt.subplot(gs[1, :])
-    plot(noise, desc='Шумы')
-    plt.subplot(gs[2, :])
-    plot(noise + harm, desc='Гармонический сигнал с шумами')
-    plt.show()
+    # m = [1, 2, 3, 10, 50, 100]
+    # s = 100
+    # harm = harmonic_motion(n, 5, s/20, 0.002)
+    # noise = normalize(numpy_random(n), 2)
+    # plt.subplot(gs[0, :])
+    # plot(harm, desc='Гармонический сигнал')
+    # plt.subplot(gs[1, :])
+    # plot(noise, desc='Шумы')
+    # plt.subplot(gs[2, :])
+    # plot(noise + harm, desc='Гармонический сигнал с шумами')
+    # plt.show()
+    #
+    # gs = gr.GridSpec(6, 6)
+    # realisation = np.zeros(1000)
+    # j = 0
+    # for i in m:
+    #     # plt.subplot(gs[j, :])
+    #     realisation += normalize(numpy_random(n), s) + harm
+    #     realisation /= i
+    #     plot(realisation, desc='M = ' + str(i))
+    #     j += 1
+    #     print('M = ' + str(i) + ', std: ' + str(np.std(realisation)))
+    # plt.show()
 
-    gs = gr.GridSpec(6, 6)
-    realisation = np.zeros(1000)
-    j = 0
-    for i in m:
-        # plt.subplot(gs[j, :])
-        realisation += normalize(numpy_random(n), s) + harm
-        realisation /= i
-        plot(realisation, desc='M = ' + str(i))
-        j += 1
-        print('M = ' + str(i) + ', std: ' + str(np.std(realisation)))
-    plt.show()
+
 
 
 #   120 - фаза сжимания сердца
@@ -195,7 +197,8 @@ def ten_task(x, m):
 
 def eleven_task(dt=0.002, m=128, fcut=16.32):
     gs = gr.GridSpec(2, 3)
-    _sum_harm = harmonic_motion(1000, a=10, f=150, t=0.001) + harmonic_motion(1000, a=10, f=50, t=0.001)
+    _sum_harm = harmonic_motion(1000, a=10, f=5, t=0.001) + harmonic_motion(1000, a=10, f=50, t=0.001) + \
+                harmonic_motion(1000, a=10, f=150, t=0.001)
     lpF = low_pass_filter(fcut=fcut)
     conv = convolution(_sum_harm, lpF)
     ft_sh = fourier_transform(_sum_harm, len(_sum_harm))
@@ -217,12 +220,21 @@ def eleven_task(dt=0.002, m=128, fcut=16.32):
 
 
 def twelve_task(dt=0.002, m=128, fcut=15):
-    gs = gr.GridSpec(2, 4)
-    _sum_harm = harmonic_motion(1000, a=10, f=150, t=0.001) + harmonic_motion(1000, a=10, f=50, t=0.001)
+    gs = gr.GridSpec(2, 4) #(2, 4)
+    _sum_harm = harmonic_motion(1000, a=10, f=5, t=0.001) + harmonic_motion(1000, a=10, f=50, t=0.001) + \
+                harmonic_motion(1000, a=10, f=150, t=0.001)
     lpF = low_pass_filter(fcut=fcut)
     hpF = high_pass_filter(fcut=fcut)
     bpF = band_pass_filter(10, 30)
     bsF = band_stop_filter(10, 30)
+    lpF_conv = convolution(_sum_harm, lpF)
+    hpF_conv = convolution(lpF_conv, hpF)
+    bpF_conv = convolution(hpF_conv, bpF)
+    bsF_conv = convolution(lpF_conv, bsF)
+    ft_lpF_harm = fourier_transform(_sum_harm, len(_sum_harm))
+    ft_hpF_harm = fourier_transform(hpF_conv, len(hpF_conv))
+    ft_bpF_harm = fourier_transform(bpF_conv, len(bpF_conv))
+    ft_bsF_harm = fourier_transform(bsF_conv, len(bsF_conv))
     ft_lpF = fourier_transform(lpF, len(lpF))
     ft_hpF = fourier_transform(hpF, len(hpF))
     ft_bpF = fourier_transform(bpF, len(bpF))
@@ -232,7 +244,7 @@ def twelve_task(dt=0.002, m=128, fcut=15):
     plt.subplot(gs[0, 1])
     plot(hpF, desc='ФВЧ')
     plt.subplot(gs[0, 2])
-    plot(bpF, desc='ПВЧ')
+    plot(bpF, desc='ППЧ')
     plt.subplot(gs[0, 3])
     plot(bsF, desc='РФ')
     plt.subplot(gs[1, 0])
@@ -241,14 +253,37 @@ def twelve_task(dt=0.002, m=128, fcut=15):
     plt.subplot(gs[1, 1])
     plot(ft_hpF[1] * 2 * m, desc='Частотная хар-ка ФВЧ')
     plt.subplot(gs[1, 2])
-    plot(ft_bpF[1] * 2 * m, desc='Частотная хар-ка ПВЧ')
+    plot(ft_bpF[1] * 2 * m, desc='Частотная хар-ка ППЧ')
     plt.subplot(gs[1, 3])
     plot(ft_bsF[1], desc='Частотная хар-ка РФ')
+    plt.show()
+    plt.subplot(gs[0, 0])
+    plot(lpF_conv[:len(lpF_conv) // 2], desc='ФНФ')
+    plt.subplot(gs[0, 1])
+    plot(hpF_conv[:len(hpF_conv) // 2], desc='ФВФ')
+    plt.subplot(gs[0, 2])
+    plot(bpF_conv[:len(bpF_conv) // 2], desc='ППФ')
+    plt.subplot(gs[0, 3])
+    plot(bsF_conv[:len(bsF_conv) // 2], desc='РФ')
+    plt.subplot(gs[1, 0])
+    plot(ft_lpF_harm[1] * 2 * m, desc='Частотная хар-ка ФНФ')
+    plt.subplot(gs[1, 1])
+    plot(ft_hpF_harm[1] * 2 * m, desc='Частотная хар-ка ФВФ')
+    plt.subplot(gs[1, 2])
+    plot(ft_bsF_harm[1], desc='Частотная хар-ка РФ')
+    plt.subplot(gs[1, 3])
+    plot(ft_bpF_harm[1] * 2 * m, desc='Частотная хар-ка ППФ')
     plt.show()
 
 
 def thirteen_task():
-    plot(wav_values(), desc='Запись')
+    gs = gr.GridSpec(2, 1)
+    wav = wav_values()
+    plt.subplot(gs[0, :])
+    plot(wav, desc='Запись')
+    plt.subplot(gs[1, :])
+    ft_wav = fourier_transform(wav, len(wav))
+    plot(ft_wav, desc='Фурье записи')
     plt.show()
 
 
@@ -269,7 +304,8 @@ if __name__ == "__main__":
     # sixth_task(x, N)
     # seventh_task(x, N)
     # eight_task(x)
-    nine_task(N)
+    # nine_task(N)
     # ten_task(x, 200)
-    # eleven_task(x, fcut=10)
-    # twelve_task()
+    # eleven_task(fcut=30)
+    # twelve_task(fcut=30)
+    thirteen_task()
