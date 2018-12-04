@@ -80,3 +80,8 @@ def band_stop_filter(f1, f2, m=128, dt=0.002):
     bsW = lpW1 - lpW2
     bsW[m] = 1 + lpW2[m] - lpW1[m]
     return bsW
+
+
+def anti_trend(x, noise):
+    return x - noise
+
