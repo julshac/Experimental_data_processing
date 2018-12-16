@@ -9,6 +9,7 @@ from model.shifts import *
 from model.trend import *
 from analysis.probfun import *
 from analysis.stats import *
+from amplitude_modulation import *
 
 
 def first_task(x, k, b, alp, bet):
@@ -294,6 +295,30 @@ def thirteen_task():
     plt.show()
 
 
+def course_work():
+    gs = gr.GridSpec(2, 4)
+    mod = modulation()
+    plt.subplot(gs[0, :])
+    plot(signal(), desc='Исходный сигнал')
+    plt.subplot(gs[1, 0])
+    plot(mod, desc='модуляция при m=0.5')
+    plt.subplot(gs[1, 1])
+    plot(modulation(m=0.1), desc='модуляция при m=0.1')
+    plt.subplot(gs[1, 2])
+    plot(modulation(m=0.99), desc='модуляция при m=0.99')
+    plt.subplot(gs[1, 3])
+    plot(modulation(m=1.5), desc='модуляция при m=1.5')
+    plt.show()
+    ft_mod_sig = fourier_transform(modulation(), len(mod))
+    plt.subplot(gs[0, :])
+    plot(ft_mod_sig[1], desc='Фурье модуляции сигнала')
+    plt.subplot(gs[1, 0])
+    # plot(peaks(0.01, 5, mod), desc='Пики для модуляции сигнала')
+    # plt.subplot(gs[1, 1])
+    # plot(remove_peaks(mod), desc='Анти-пики для модуляции сигнала')
+    plt.show()
+
+
 if __name__ == "__main__":
     fig = plt.figure(1, figsize=(12, 4), dpi=80)
     N = 1000
@@ -311,8 +336,10 @@ if __name__ == "__main__":
     # sixth_task(x, N)
     # seventh_task(x, N)
     # eight_task(x)
-    nine_task(N)
+    # nine_task(N)
     # ten_task(x, 200)
     # eleven_task(fcut=30)
     # twelve_task(fcut=30)
     # thirteen_task()
+    course_work()
+

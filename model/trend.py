@@ -78,7 +78,7 @@ def band_stop_filter(f1, f2, m=128, dt=0.002):
     lpW1 = low_pass_filter(m, f1, dt)
     lpW2 = low_pass_filter(m, f2, dt)
     bsW = lpW1 - lpW2
-    bsW[m] = 1 + lpW2[m] - lpW1[m]
+    bsW[m] = 1 + lpW1[m] - lpW2[m]
     return bsW
 
 
