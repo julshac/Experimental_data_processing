@@ -11,6 +11,13 @@ def numpy_random(count: int) -> np.array:
     return np.random.sample(count)
 
 
+def rnd(low, high, n=1000):
+    t = np.zeros(n)
+    for i in range(n):
+        t[i] = np.random.uniform(low, high)
+    return t
+
+
 def my_random(count) -> np.array:
     core = np.random.normal(size=(count, 1))
     return np.log(np.sin(hash(core)))
