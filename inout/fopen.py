@@ -1,5 +1,7 @@
 from subprocess import Popen
 import numpy as np
+from scipy import misc
+from scipy.misc import imsave
 from scipy.io.wavfile import read
 
 
@@ -14,3 +16,8 @@ def dat_values():
 def wav_values():
     a = read("data/Recording.wav")
     return np.array(a[1], dtype=float)
+
+
+def img_values():
+    img = misc.imread('data/grace.jpg')
+    return img
