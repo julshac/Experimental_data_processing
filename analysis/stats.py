@@ -109,6 +109,7 @@ def fourier_step(x, N, n):
     return re, im
 
 
+@jit
 #Обратное преобразование Фурье
 def inverse_fourier_transform(cs, N):
     xk = []

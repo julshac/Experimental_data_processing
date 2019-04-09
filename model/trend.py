@@ -29,11 +29,13 @@ def heartbeat(n=1000, m=200):
 
 
 def convolution(x, h):
-    y = np.zeros(len(x) + len(h))
-    for k in range(len(x)):
-        for i in range(len(h)):
-            y[k] += x[k - i] * h[i]
-    return y[:-len(h)]
+    M = len(h)
+    N = len(x)
+    y = np.zeros((N+M))
+    for k in range(0, N + M):
+        for m in range(0, M):
+            y[k] += x[(k-m)%N] * h[m]
+    return y[M//2:-M//2]
 
 
 @jit()

@@ -1,5 +1,6 @@
 import numpy as np
 import math
+from numba import jit
 
 
 def signal(n=1000, amplitude=100):
@@ -64,6 +65,7 @@ def LPF(Fcut: float, dT: float, m: int = 32) -> list:
     return answer
 
 
+@jit
 def HPF(Fcut: float, dT: float, m: int = 32) -> list:
     lpw = np.array(LPF(Fcut=Fcut, dT=dT, m=m))
 
@@ -74,6 +76,7 @@ def HPF(Fcut: float, dT: float, m: int = 32) -> list:
     return lpw.tolist()
 
 
+@jit
 def BPF(Fcut1: float, Fcut2: float, dT: float, m: int = 32) -> list:
     lpw1 = np.array(LPF(Fcut=Fcut1, dT=dT, m=m))
     lpw2 = np.array(LPF(Fcut=Fcut2, dT=dT, m=m))
