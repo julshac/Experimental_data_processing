@@ -87,7 +87,8 @@ def harmonic_motion(n, a, f, t):
 
 #Преобразование Фурье
 @jit()
-def fourier_transform(x, N):
+def fourier_transform(x, N=0):
+    N = len(x)
     re = np.zeros(N)
     im = np.zeros(N)
     # x = list(map(float, x))
@@ -111,8 +112,9 @@ def fourier_step(x, N, n):
 
 @jit
 #Обратное преобразование Фурье
-def inverse_fourier_transform(cs, N):
+def inverse_fourier_transform(cs, N=0):
     xk = []
+    N = len(cs)
     for n in range(0, N):
         re = 0
         im = 0

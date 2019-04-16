@@ -4,12 +4,11 @@ from inout.fopen import *
 from analysis.image_analysis import *
 import numpy as np
 from matplotlib import pyplot as plt
-import cv2
+from model import Fourier
 from analysis import stats
 from analysis import amplitude_modulation
 from model import trend, random, shifts
 from scipy import ndimage
-from scipy.misc import imresize
 from numba import jit
 dpi = 120
 
@@ -233,6 +232,34 @@ def image_restoration(values):
     plt.title("Обратное Фурье")
 
 
+@jit
+def image_distortion(values):
+    gs = gr.GridSpec(1, 2)
+    plt.subplot(gs[0, 0])
+    plt.imshow(values, cmap='gray')
+    plt.title("Исходное изображение")
+
+    ft = Fourier.ft(values)
+    # ft = np.fft.rfft2(values)
+
+    data = dat_values("data/kernD76_f4.dat")
+    # ft_dat = np.fft.rfft2(data)
+    data = np.append(data, np.full(ft.shape[1] - len(data), 0))
+    ft_dat = stats.fourier_transform(data)[0]
+
+    # ft_dat = np.append(ft_dat, np.full(ft.shape[1] - len(ft_dat), 1))
+
+    for i in range(ft.shape[0]):
+        ft[i] = ft[i] / ft_dat
+
+    # ft = np.fft.irfft2(ft)
+    ft = Fourier.inverse_ft(ft)
+
+    plt.subplot(gs[0, 1])
+    plt.imshow(ft, cmap='gray')
+    plt.title("Искаженное изображение")
+
+
 def result():
     scale = 4
     plt.figure()
@@ -284,30 +311,25 @@ def result():
     # plt.imshow(filter(xcr), cmap='gray')
 
     ##Шумы
-    picture = to_one_channel(img_values("data/MODEL.jpg"))
-    noises(picture)
-    plt.figure()
-    gs = gr.GridSpec(2, 2)
-    plt.subplot(gs[0, 0])
-    plt.imshow(median_filter(normalize(rnd_noise(picture), 5)), cmap='gray')
-    plt.title('Медианный фильтр')
-    plt.subplot(gs[0, 1])
-    plt.imshow(average_filter(normalize(rnd_noise(picture), 5)), cmap='gray')
-    plt.title('Усредненный фильтр')
-    plt.subplot(gs[1, 0])
-    plt.imshow(median_filter(normalize(salt_pepper(picture), 5)), cmap='gray')
-    plt.subplot(gs[1, 1])
-    plt.imshow(average_filter(normalize(salt_pepper(picture), 5)), cmap='gray')
+    # picture = to_one_channel(img_values("data/MODEL.jpg"))
+    # noises(picture)
+    # plt.figure()
+    # gs = gr.GridSpec(2, 2)
+    # plt.subplot(gs[0, 0])
+    # plt.imshow(median_filter(normalize(rnd_noise(picture), 5)), cmap='gray')
+    # plt.title('Медианный фильтр')
+    # plt.subplot(gs[0, 1])
+    # plt.imshow(average_filter(normalize(rnd_noise(picture), 5)), cmap='gray')
+    # plt.title('Усредненный фильтр')
+    # plt.subplot(gs[1, 0])
+    # plt.imshow(median_filter(normalize(salt_pepper(picture), 5)), cmap='gray')
+    # plt.subplot(gs[1, 1])
+    # plt.imshow(average_filter(normalize(salt_pepper(picture), 5)), cmap='gray')
 
-    #Фурье
+    #2D Фурье
     # picture = to_one_channel(img_values("data/image2.jpg"))
     # image_restoration(picture)
 
-
-
-
-
-
-
-
-
+    #Искажение изображения. Выделение 3ки
+    picture = dat_2D_reader("data/blur307x221D.dat")
+    image_distortion(picture)

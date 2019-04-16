@@ -1,16 +1,29 @@
+import struct
 from subprocess import Popen
 import numpy as np
 from scipy import misc
 from scipy.misc import imsave
 from scipy.io.wavfile import read
+import io
 
 
-def dat_values():
-    # p = Popen("pgp_1ms.dat", cwd=r"C:\OSPanel\Works")
-    # stdout, stderr = p.communicate()
-    a = np.fromfile("data/pgp_1ms.dat", dtype=np.float32)
-    print(a)
-    return a
+def dat_values(path, length=76):
+    noise = []
+    with open(path, 'rb') as f:
+        for i in range(length):
+            d = f.read(4)
+            t = struct.unpack('f', d)
+            noise.append(t)
+    # with open(path, 'br') as f:
+    #     data = np.array(struct.unpack(str(len) + "f", f.read()), dtype=np.float32)
+    return noise
+
+
+def dat_2D_reader(path, rows=221, cols=307):
+    with open(path, 'br') as f:
+        data = np.array(struct.unpack(str(rows * cols) + "f", f.read()), dtype=np.float16)
+        data = data.reshape((rows, cols))
+    return data
 
 
 def wav_values():
