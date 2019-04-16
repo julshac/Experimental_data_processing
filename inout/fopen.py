@@ -8,15 +8,15 @@ import io
 
 
 def dat_values(path, length=76):
-    noise = []
-    with open(path, 'rb') as f:
-        for i in range(length):
-            d = f.read(4)
-            t = struct.unpack('f', d)
-            noise.append(t)
-    # with open(path, 'br') as f:
-    #     data = np.array(struct.unpack(str(len) + "f", f.read()), dtype=np.float32)
-    return noise
+    # noise = []
+    # with open(path, 'rb') as f:
+    #     for i in range(length):
+    #         d = f.read(4)
+    #         t = struct.unpack('f', d)
+    #         noise.append(t)
+    with open(path, 'br') as f:
+        data = np.array(struct.unpack(str(length) + "f", f.read()), dtype=np.float32)
+    return data
 
 
 def dat_2D_reader(path, rows=221, cols=307):
