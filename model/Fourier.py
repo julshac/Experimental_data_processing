@@ -1,6 +1,7 @@
 from analysis import stats
 import numpy as np
 from numba import jit
+from model import trend
 
 
 @jit
@@ -20,3 +21,12 @@ def inverse_ft(ft):
     for i in range(ft.shape[1]):
         ft[:, i] = stats.inverse_fourier_transform(ft[:, i])
     return ft
+
+
+def img_convolution(picture, filter):
+    img = np.empty(picture.shape)
+    for i in range(picture.shape[0]):
+        img[i] = trend.convolution(picture[i], filter)
+    for i in range(picture.shape[1]):
+        img[:, i] = trend.convolution(img[:, i], filter)
+    return img

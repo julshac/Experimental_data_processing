@@ -101,36 +101,6 @@ def equalisation(picture):
     plt.show()
 
 
-def lsFilters(picture):
-    threshimg = np.zeros_like(picture)
-    w = picture > 200
-    b = picture < 200
-    threshimg[w], threshimg[b] = 255, 0
-    # Фильтры Собеля
-    maskh = np.array([[-1, -2, -1],
-                      [0, 0, 0],
-                      [1, 2, 1]])
-    maskv = maskh.T
-    # Лапласиан
-    laplas = np.array([[-1, -1, -1],
-                       [-1, 8, -1],
-                       [-1, -1, -1]])
-
-    padded = np.pad(threshimg, (1, 1), 'constant')
-    vert = ndimage.convolve(padded, maskv)  # vertical edges
-    horiz = ndimage.convolve(padded, maskh)  # horizontal edges
-    plt.title('Vertical')
-    plt.imshow(vert, cmap='gray')
-
-    plt.figure()
-    plt.title('Horizontal')
-    plt.imshow(horiz, cmap='gray')
-    laplasian = ndimage.convolve(padded, laplas)
-    plt.figure()
-    plt.title('Lablasian')
-    plt.imshow(laplasian, cmap='gray')
-
-
 def filter(val):
     gs = gr.GridSpec(1, 1)
     ft5 = stats.fourier_transform(val[5], len(val))
@@ -260,6 +230,89 @@ def image_distortion(values):
     plt.title("Искаженное изображение")
 
 
+def scaling2D(image, min, max, scale):
+    res = []
+    for i in image:
+        row = []
+        for j in i:
+            f = (j - min) / (max - min) * scale
+            row.append(int(f))
+        res.append(row)
+    return np.array(res)
+
+
+@jit
+def edge_restore(picture, img, treshold=165):
+    restore = img
+    if filter == "lpf":
+        img = img.reshape(picture.shape)
+        restore = picture - img
+    restore = scaling2D(restore, min(restore.flat), max(restore.flat), 255)
+
+    filtered = np.empty(0)
+    for i in restore.flatten():
+        if i > treshold:
+            filtered = np.append(filtered, 255)
+        else:
+            filtered = np.append(filtered, 0)
+    restore = filtered.reshape(300, 400)
+    return restore
+
+
+@jit
+def edge_detection(picture, filter="lpf"):
+    img = np.empty(picture.shape)
+    if filter not in ("lpf", "hpf"):
+        raise ValueError("unknown filter")
+    if filter == "lpf":
+        lpF = amplitude_modulation.LPF(0.05, dT=1, m=8)
+        for i in range(picture.shape[0]):
+            img[i] = trend.convolution(picture[i], lpF)
+        for i in range(picture.shape[1]):
+            img[:, i] = trend.convolution(img[:, i], lpF)
+        plt.imshow(edge_restore(picture, img), cmap='gray')
+        plt.title("LPF")
+    if filter == "hpf":
+        hpF = amplitude_modulation.HPF(0.2, dT=1, m=8)
+        for i in range(picture.shape[0]):
+            img[i] = trend.convolution(picture[i], hpF)
+        for i in range(picture.shape[1]):
+            img[:, i] = trend.convolution(img[:, i], hpF)
+        plt.imshow(edge_restore(picture, img), cmap='gray')
+        plt.title("HPF")
+
+
+@jit
+def lsFilters(picture):
+    threshimg = np.zeros_like(picture)
+    w = picture > 200
+    b = picture < 200
+    threshimg[w], threshimg[b] = 255, 0
+    # Фильтры Собеля
+    mask_gradient = np.array([[-1, -2, -1],
+                      [0, 0, 0],
+                      [1, 2, 1]])
+    mask = mask_gradient.T
+    # Лапласиан
+    laplas = np.array([[-1, -1, -1],
+                       [-1, 8, -1],
+                       [-1, -1, -1]])
+
+    padded = np.pad(threshimg, (1, 1), 'constant')
+    vert = ndimage.convolve(padded, mask)  # vertical edges
+    horiz = ndimage.convolve(padded, mask_gradient)  # horizontal edges
+    plt.title('Vertical')
+    plt.imshow(vert, cmap='gray')
+
+    plt.figure()
+    plt.title('Horizontal')
+    plt.imshow(horiz, cmap='gray')
+    laplasian = ndimage.convolve(padded, laplas)
+    plt.figure()
+    plt.title('Lablasian')
+    plt.imshow(laplasian, cmap='gray')
+
+
 def result():
     scale = 4
     plt.figure()
@@ -331,5 +384,25 @@ def result():
     # image_restoration(picture)
 
     #Искажение изображения. Выделение 3ки
-    picture = dat_2D_reader("data/blur307x221D.dat")
-    image_distortion(picture)
+    # picture = dat_2D_reader("data/blur307x221D.dat")
+    # image_distortion(picture)
+
+    #выделение границ
+    picture = to_one_channel(img_values("data/MODEL.jpg"))
+    # lsFilters(picture)
+    plt.imshow(picture, cmap='gray')
+    plt.title('Исходное изображение')
+    plt.figure()
+    gs = gr.GridSpec(1, 2)
+    plt.subplot(gs[0, 0])
+    edge_detection(picture, "lpf")
+    plt.subplot(gs[0, 1])
+    edge_detection(picture, "hpf")
+
+    #выделение границ (Лапласиан, гралиент (Собель))
+    # picture = to_one_channel(img_values("data/MODEL.jpg"))
+    # # lsFilters(picture)
+    # plt.imshow(picture, cmap='gray')
+    # plt.title('Исходное изображение')
+    # plt.figure()
+    # lsFilters(picture)
