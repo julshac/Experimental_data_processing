@@ -1,10 +1,10 @@
 import struct
-from subprocess import Popen
+# from subprocess import Popen
 import numpy as np
 from scipy import misc
 from scipy.misc import imsave
 from scipy.io.wavfile import read
-import io
+# import io
 
 
 def dat_values(path, length=76):

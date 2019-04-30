@@ -273,7 +273,7 @@ def edge_detection(picture, filter="lpf"):
         plt.imshow(edge_restore(picture, img), cmap='gray')
         plt.title("LPF")
     if filter == "hpf":
-        hpF = amplitude_modulation.HPF(0.2, dT=1, m=8)
+        hpF = amplitude_modulation.HPF(0.05, dT=1, m=8)
         for i in range(picture.shape[0]):
             img[i] = trend.convolution(picture[i], hpF)
         for i in range(picture.shape[1]):
@@ -283,34 +283,41 @@ def edge_detection(picture, filter="lpf"):
 
 
 @jit
-def lsFilters(picture):
+def gradientLaplasian(picture):
     threshimg = np.zeros_like(picture)
     w = picture > 200
     b = picture < 200
     threshimg[w], threshimg[b] = 255, 0
-    # Фильтры Собеля
-    mask_gradient = np.array([[-1, -2, -1],
-                      [0, 0, 0],
-                      [1, 2, 1]])
-    mask = mask_gradient.T
+    #маска Собеля (взять левую маску, правую, взять от них модуль и сложить)
+    mask_sobel = np.array([[-1, -2, -1],
+                           [0, 0, 0],
+                           [1, 2, 1]])
+    mask = mask_sobel.T
     # Лапласиан
     laplas = np.array([[-1, -1, -1],
                        [-1, 8, -1],
                        [-1, -1, -1]])
 
     padded = np.pad(threshimg, (1, 1), 'constant')
-    vert = ndimage.convolve(padded, mask)  # vertical edges
-    horiz = ndimage.convolve(padded, mask_gradient)  # horizontal edges
-    plt.title('Vertical')
+    vert = ndimage.convolve(padded, mask)  # вертикальная граница
+    hor = ndimage.convolve(padded, mask_sobel)  # горизонтальная граница
+    gs = gr.GridSpec(2, 2)
+    plt.subplot(gs[0, :])
+    plt.title('Лапласиан')
+    laplas = ndimage.convolve(padded, laplas)
+    plt.imshow(laplas, cmap='gray')
+
+    plt.subplot(gs[1, 0])
+    plt.title('Вертикальные грани')
     plt.imshow(vert, cmap='gray')
 
-    plt.figure()
-    plt.title('Horizontal')
-    plt.imshow(horiz, cmap='gray')
-    laplasian = ndimage.convolve(padded, laplas)
-    plt.figure()
-    plt.title('Lablasian')
-    plt.imshow(laplasian, cmap='gray')
+    plt.subplot(gs[1, 1])
+    plt.title('Горизонтальные грани')
+    plt.imshow(hor, cmap='gray')
+
+
+def erosionDilation(picture):
+
 
 
 def result():
@@ -388,21 +395,24 @@ def result():
     # image_distortion(picture)
 
     #выделение границ
-    picture = to_one_channel(img_values("data/MODEL.jpg"))
-    # lsFilters(picture)
-    plt.imshow(picture, cmap='gray')
-    plt.title('Исходное изображение')
-    plt.figure()
-    gs = gr.GridSpec(1, 2)
-    plt.subplot(gs[0, 0])
-    edge_detection(picture, "lpf")
-    plt.subplot(gs[0, 1])
-    edge_detection(picture, "hpf")
-
-    #выделение границ (Лапласиан, гралиент (Собель))
     # picture = to_one_channel(img_values("data/MODEL.jpg"))
     # # lsFilters(picture)
     # plt.imshow(picture, cmap='gray')
     # plt.title('Исходное изображение')
     # plt.figure()
-    # lsFilters(picture)
+    # gs = gr.GridSpec(1, 2)
+    # plt.subplot(gs[0, 0])
+    # edge_detection(picture, "lpf")
+    # plt.subplot(gs[0, 1])
+    # edge_detection(picture, "hpf")
+
+    #выделение границ (Лапласиан, гралиент (Собель))
+    picture = to_one_channel(img_values("data/MODEL.jpg"))
+    plt.imshow(picture, cmap='gray')
+    plt.title('Исходное изображение')
+    plt.figure()
+    gradientLaplasian(picture)
+    plt.show()
+    gradientLaplasian(rnd_noise(picture))
+    plt.show()
+    gradientLaplasian(salt_pepper(picture))
