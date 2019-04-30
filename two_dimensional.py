@@ -10,6 +10,7 @@ from analysis import amplitude_modulation
 from model import trend, random, shifts
 from scipy import ndimage
 from numba import jit
+import cv2
 dpi = 120
 
 
@@ -317,7 +318,40 @@ def gradientLaplasian(picture):
 
 
 def erosionDilation(picture):
+    #эрозия с определенной маской делает изображение меньше
+    threshimg = np.zeros_like(picture)
+    kernel = np.ones((5, 5), np.uint8)  # Морфологические образы
+    w = picture > 200
+    b = picture < 200
+    threshimg[w], threshimg[b] = 255, 0
 
+    gs = gr.GridSpec(3, 2)
+    plt.subplot(gs[0, :])
+    plt.title('Оригинальное пороговое изображение')
+    plt.imshow(threshimg, cmap='gray')
+
+    plt.subplot(gs[1, 0])
+    erosion = cv2.erode(threshimg, kernel, iterations=1)
+    plt.title('Эрозия')
+    plt.imshow(erosion, cmap='gray')
+
+    plt.subplot(gs[1, 1])
+    dilation = cv2.dilate(threshimg, kernel, iterations=1)
+    plt.title("Дилатация")
+    plt.imshow(dilation, cmap='gray')
+
+    plt.subplot(gs[2, 0])
+    plt.title('Выделение контура (дил - порог)')
+    plt.imshow(dilation - threshimg, cmap='gray')
+
+    contour = dilation - erosion
+    plt.subplot(gs[2, 1])
+    plt.title('Выделение контура (дил - эр)')
+    plt.imshow(contour, cmap='gray')
+
+    dilation2 = cv2.dilate(erosion, kernel, iterations=1)
+    plt.figure()
+    plt.imshow(dilation2, cmap='gray')
 
 
 def result():
@@ -407,12 +441,16 @@ def result():
     # edge_detection(picture, "hpf")
 
     #выделение границ (Лапласиан, гралиент (Собель))
+    # picture = to_one_channel(img_values("data/MODEL.jpg"))
+    # plt.imshow(picture, cmap='gray')
+    # plt.title('Исходное изображение')
+    # plt.figure()
+    # gradientLaplasian(picture)
+    # plt.show()
+    # gradientLaplasian(rnd_noise(picture))
+    # plt.show()
+    # gradientLaplasian(salt_pepper(picture))
+
+    #эрозия и дилатация
     picture = to_one_channel(img_values("data/MODEL.jpg"))
-    plt.imshow(picture, cmap='gray')
-    plt.title('Исходное изображение')
-    plt.figure()
-    gradientLaplasian(picture)
-    plt.show()
-    gradientLaplasian(rnd_noise(picture))
-    plt.show()
-    gradientLaplasian(salt_pepper(picture))
+    erosionDilation(picture)
