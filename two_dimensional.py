@@ -7,7 +7,8 @@ from matplotlib import pyplot as plt
 from model import Fourier
 from analysis import stats
 from analysis import amplitude_modulation
-from model import trend, random, shifts
+from model import trend, random, shifts, _fourier
+import model._fourier as m
 from scipy import ndimage
 from numba import jit
 import cv2
@@ -203,20 +204,24 @@ def image_restoration(values):
     plt.title("Обратное Фурье")
 
 
-@jit
 def image_distortion(values):
     gs = gr.GridSpec(1, 2)
     plt.subplot(gs[0, 0])
-    plt.imshow(values, cmap='gray')
+    values = np.array(values.real, dtype=np.float)
     plt.title("Исходное изображение")
+    plt.imshow(values, cmap='gray')
 
-    ft = Fourier.ft(values)
+    # ft = Fourier.ft(values)
     # ft = np.fft.rfft2(values)
+    ft = m.fourier_2D(values, complex=True)
 
     data = dat_values("data/kernD76_f4.dat")
-    # ft_dat = np.fft.rfft2(data)
+
+    # ft_dat = m.fourier_2D(data, complex=True)
     data = np.append(data, np.full(ft.shape[1] - len(data), 0))
-    ft_dat = stats.fourier_transform(data)[0]
+    # ft_dat = np.fft.rfft2(data)
+    # ft_dat = stats.fourier_transform(data)[0]
+    ft_dat = m.fourier_complex(data)
 
     # ft_dat = np.append(ft_dat, np.full(ft.shape[1] - len(ft_dat), 1))
 
@@ -224,11 +229,42 @@ def image_distortion(values):
         ft[i] = ft[i] / ft_dat
 
     # ft = np.fft.irfft2(ft)
-    ft = Fourier.inverse_ft(ft)
+    ft = m.fourier_2D_back(ft, complex=True)
+    # ft = Fourier.inverse_ft(ft)
+    ft = np.array(ft.real, dtype=np.float)
 
     plt.subplot(gs[0, 1])
-    plt.imshow(ft, cmap='gray')
     plt.title("Искаженное изображение")
+    plt.imshow(ft, cmap='gray')
+
+
+def image_distortion_noise(values):
+    gs = gr.GridSpec(1, 2)
+    plt.subplot(gs[0, 0])
+    values = np.array(values.real, dtype=np.float)
+    plt.title("Исходное изображение")
+    plt.imshow(values, cmap='gray')
+
+    # ft = Fourier.ft(values)
+    # ft = np.fft.rfft2(values)
+    ft = m.fourier_2D(values, complex=True)
+
+    data = dat_values("data/kernD76_f4.dat")
+    # ft_dat = m.fourier_2D(data, complex=True)
+    data = np.append(data, np.full(ft.shape[1] - len(data), 0))
+    # ft_dat = np.fft.rfft2(data)
+    # ft_dat = stats.fourier_transform(data)[0]
+    ft_dat = m.fourier_complex(data)
+    result = ft * ((ft_dat.conj()) / ((np.absolute(ft_dat) ** 2) + 0.00001))
+    # ft_dat = np.append(ft_dat, np.full(ft.shape[1] - len(ft_dat), 1))
+
+    # ft = np.fft.irfft2(ft)
+    ft = m.fourier_2D_back(result, complex=True)
+    # ft = Fourier.inverse_ft(ft)
+    ft = np.array(ft.real, dtype=np.float)
+    plt.subplot(gs[0, 1])
+    plt.title("Искаженное изображение")
+    plt.imshow(ft, cmap='gray')
 
 
 def scaling2D(image, min, max, scale):
@@ -242,7 +278,7 @@ def scaling2D(image, min, max, scale):
     return np.array(res)
 
 
-@jit
+
 def edge_restore(picture, img, treshold=165):
     restore = img
     if filter == "lpf":
@@ -271,7 +307,8 @@ def edge_detection(picture, filter="lpf"):
             img[i] = trend.convolution(picture[i], lpF)
         for i in range(picture.shape[1]):
             img[:, i] = trend.convolution(img[:, i], lpF)
-        plt.imshow(edge_restore(picture, img), cmap='gray')
+        plt.imshow(np.array(picture - img > 10, dtype=np.float)*255, cmap='gray')
+        # plt.imshow(edge_restore(picture, img), cmap='gray')
         plt.title("LPF")
     if filter == "hpf":
         hpF = amplitude_modulation.HPF(0.05, dT=1, m=8)
@@ -279,7 +316,8 @@ def edge_detection(picture, filter="lpf"):
             img[i] = trend.convolution(picture[i], hpF)
         for i in range(picture.shape[1]):
             img[:, i] = trend.convolution(img[:, i], hpF)
-        plt.imshow(edge_restore(picture, img), cmap='gray')
+        plt.imshow(np.array(img > 8, dtype=np.float) * 255, cmap='gray')
+        # plt.imshow(edge_restore(picture, img), cmap='gray')
         plt.title("HPF")
 
 
@@ -289,7 +327,7 @@ def gradientLaplasian(picture):
     w = picture > 200
     b = picture < 200
     threshimg[w], threshimg[b] = 255, 0
-    #маска Собеля (взять левую маску, правую, взять от них модуль и сложить)
+    # маска Собеля (взять левую маску, правую, взять от них модуль и сложить)
     mask_sobel = np.array([[-1, -2, -1],
                            [0, 0, 0],
                            [1, 2, 1]])
@@ -426,19 +464,42 @@ def result():
 
     #Искажение изображения. Выделение 3ки
     # picture = dat_2D_reader("data/blur307x221D.dat")
-    # image_distortion(picture)
+    # image_distortion_noise(picture)
+    # plt.show()
+    # picture = dat_2D_reader("data/blur307x221D_N.dat")
+    # image_distortion_noise(rnd_noise(picture))
+    # plt.show()
+    # image_distortion_noise(salt_pepper(picture))
 
-    #выделение границ
+    # выделение границ
     # picture = to_one_channel(img_values("data/MODEL.jpg"))
-    # # lsFilters(picture)
     # plt.imshow(picture, cmap='gray')
     # plt.title('Исходное изображение')
-    # plt.figure()
-    # gs = gr.GridSpec(1, 2)
+    # gs = gr.GridSpec(3, 3)
     # plt.subplot(gs[0, 0])
+    # plt.imshow(picture, cmap='gray')
+    # plt.title('Исходное изображение')
+    # plt.subplot(gs[1, 0])
     # edge_detection(picture, "lpf")
-    # plt.subplot(gs[0, 1])
+    # plt.subplot(gs[2, 0])
     # edge_detection(picture, "hpf")
+    # plt.subplot(gs[0, 1])
+    # rnd = rnd_noise(picture)
+    # plt.imshow(rnd, cmap='gray')
+    # plt.title('Случайный шум')
+    # plt.subplot(gs[1, 1])
+    # edge_detection(rnd, "lpf")
+    # plt.subplot(gs[2, 1])
+    # edge_detection(rnd, "hpf")
+    # plt.subplot(gs[0, 2])
+    # sp = salt_pepper(picture)
+    # plt.imshow(salt_pepper(picture), cmap='gray')
+    # plt.title('Соль-перец')
+    # plt.subplot(gs[1, 2])
+    # edge_detection(sp, "lpf")
+    # plt.subplot(gs[2, 2])
+    # edge_detection(sp, "hpf")
+
 
     #выделение границ (Лапласиан, гралиент (Собель))
     # picture = to_one_channel(img_values("data/MODEL.jpg"))
@@ -451,6 +512,10 @@ def result():
     # plt.show()
     # gradientLaplasian(salt_pepper(picture))
 
-    #эрозия и дилатация
-    picture = to_one_channel(img_values("data/MODEL.jpg"))
-    erosionDilation(picture)
+    # #эрозия и дилатация
+    # picture = to_one_channel(img_values("data/MODEL.jpg"))
+    # erosionDilation(picture)
+    # plt.show()
+    # erosionDilation(rnd_noise(picture))
+    # plt.show()
+    # erosionDilation(salt_pepper(picture))
