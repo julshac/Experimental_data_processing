@@ -2,7 +2,7 @@ import struct
 # from subprocess import Popen
 import numpy as np
 from scipy import misc
-from scipy.misc import imsave
+import imageio
 from scipy.io.wavfile import read
 # import io
 
@@ -32,7 +32,7 @@ def wav_values():
 
 
 def img_values(path):
-    img = misc.imread(path)
+    img = imageio.imread(path)
     return img
 
 

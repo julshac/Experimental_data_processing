@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-import seaborn as sns
+# import seaborn as sns
 
 
 def plot(x, y=None, desc="", xlabel="x", ylabel="f(x)"):
