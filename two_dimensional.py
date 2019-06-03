@@ -12,6 +12,7 @@ import model._fourier as m
 from scipy import ndimage
 from numba import jit
 import cv2
+
 dpi = 120
 
 
@@ -20,20 +21,20 @@ def min_image_statistics_output(picture):
     min = picture.min()
     max = picture.max()
     std = picture.std()
-    #print(f"Min: {min}, Max: {max}, Std: {std}")
+    # print(f"Min: {min}, Max: {max}, Std: {std}")
     rows = picture.shape[0]
     row_average = np.zeros(rows)
     row_variance = np.zeros(rows)
     for i in range(rows):
         row_average[i] = picture[i].mean()
         row_variance[i] = picture[i].var()
-    #построчный вывод
+    # построчный вывод
     gs = gr.GridSpec(2, 2)
     plt.subplot(gs[0, 0])
     plot(row_variance, desc='Дисперсия по строкам')
     plt.subplot(gs[0, 1])
     plot(row_average, desc='Среднее по строкам')
-    #вывод по столбцам
+    # вывод по столбцам
     columns = picture.shape[1]
     column_average = np.zeros(columns)
     column_variance = np.zeros(columns)
@@ -48,9 +49,9 @@ def min_image_statistics_output(picture):
 
 
 def brightness_output(picture):
-    #нормализация
-    #print(normalize(picture, 1))
-    #гистограмма яркости
+    # нормализация
+    # print(normalize(picture, 1))
+    # гистограмма яркости
     plt.hist(picture.flatten(), 255)
 
 
@@ -68,6 +69,8 @@ def resize(picture, scale, method="nearest"):
     if method == "bilinear":
         plt.imshow(bilinear(picture, image), aspect='auto')
         plt.title("Метод билинейной интерполяции")
+
+
 #       plt.imshow(imresize(arr=picture, size=image.shape, interp="bilinear", mode="RGB"))
 
 
@@ -81,7 +84,7 @@ def gamma(picture, gamma=0.9, c=1):
 
 def log(picture, c=1, base=0.9):
     _pic = np.array(picture, dtype=np.float)
-    b = np.log(_pic+1, dtype=np.float)/np.log(base)
+    b = np.log(_pic + 1, dtype=np.float) / np.log(base)
     return b
 
 
@@ -89,13 +92,13 @@ def equalisation(picture):
     hist, bins = np.histogram(picture.flatten(), 256, [0, 256])
     cdf = hist.cumsum()
     cdf_normalized = cdf / cdf.max() * 255
-    #print(cdf_normalized.max(), len(cdf_normalized))
+    # print(cdf_normalized.max(), len(cdf_normalized))
     rows = picture.shape[0]
     columns = picture.shape[1]
     new_pic = np.empty(picture.shape)
     for i in range(rows):
         for j in range(columns):
-            new_pic[i,j] = cdf_normalized[int(float(picture[i][j]))]
+            new_pic[i, j] = cdf_normalized[int(float(picture[i][j]))]
     plt.imshow(new_pic, cmap='gray')
     plt.show()
     plt.hist(new_pic.flatten(), color='r')
@@ -113,7 +116,7 @@ def filter(val):
     plt.subplot(gs[0, 0])
     corr_x = np.arange(0, 0.5, 0.5 / len(corr // 2))
     plt.plot(corr_x, corr)
-    #filter
+    # filter
     bpF = amplitude_modulation.BSF(0.2, 0.4, 1, 16)
     bpF_conv = np.zeros(val.shape)
     for i in range(0, len(val)):
@@ -123,11 +126,11 @@ def filter(val):
 
 def noises(picture):
     gs = gr.GridSpec(1, 1)
-    #histogram
+    # histogram
     plt.subplot(gs[0, 0])
     brightness_output(picture)
     plt.show()
-    #noise
+    # noise
     gs = gr.GridSpec(1, 2)
     plt.subplot(gs[0, 0])
     plt.imshow(rnd_noise(picture), cmap='gray')
@@ -278,7 +281,6 @@ def scaling2D(image, min, max, scale):
     return np.array(res)
 
 
-
 def edge_restore(picture, img, treshold=165):
     restore = img
     if filter == "lpf":
@@ -307,7 +309,7 @@ def edge_detection(picture, filter="lpf"):
             img[i] = trend.convolution(picture[i], lpF)
         for i in range(picture.shape[1]):
             img[:, i] = trend.convolution(img[:, i], lpF)
-        plt.imshow(np.array(picture - img > 10, dtype=np.float)*255, cmap='gray')
+        plt.imshow(np.array(picture - img > 10, dtype=np.float) * 255, cmap='gray')
         # plt.imshow(edge_restore(picture, img), cmap='gray')
         plt.title("LPF")
     if filter == "hpf":
@@ -356,7 +358,7 @@ def gradientLaplasian(picture):
 
 
 def erosionDilation(picture):
-    #эрозия с определенной маской делает изображение меньше
+    # эрозия с определенной маской делает изображение меньше
     threshimg = np.zeros_like(picture)
     kernel = np.ones((5, 5), np.uint8)  # Морфологические образы
     w = picture > 200
@@ -392,11 +394,128 @@ def erosionDilation(picture):
     plt.imshow(dilation2, cmap='gray')
 
 
+# import the necessary packages
+from scipy.spatial import distance as dist
+from imutils import perspective
+from imutils import contours
+import argparse
+import imutils
+
+
+def midpoint(ptA, ptB):
+    return ((ptA[0] + ptB[0]) * 0.5, (ptA[1] + ptB[1]) * 0.5)
+
+
+def stonesSearch(picture, width=6):
+    # threshimg = np.zeros_like(picture)
+    # kernel = np.ones((5, 5), np.uint8)  # Морфологические образы
+    # w = picture > 130
+    # b = picture < 90
+    # threshimg[w], threshimg[b] = 255, 0
+    #
+    # gs = gr.GridSpec(1, 1)
+    # plt.subplot(gs[0, :])
+    # plt.title('Оригинальное пороговое изображение')
+    # plt.imshow(threshimg, cmap='gray')
+
+    # load the image, convert it to grayscale, and blur it slightly
+    image = cv2.imread("data/stones.jpg")
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    gray = cv2.GaussianBlur(gray, (7, 7), 0)
+
+    # perform edge detection, then perform a dilation + erosion to
+    # close gaps in between object edges
+    edged = cv2.Canny(gray, 50, 100)
+    edged = cv2.dilate(edged, None, iterations=1)
+    edged = cv2.erode(edged, None, iterations=1)
+
+    # find contours in the edge map
+    cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL,
+                            cv2.CHAIN_APPROX_SIMPLE)
+    cnts = imutils.grab_contours(cnts)
+
+    # sort the contours from left-to-right and initialize the
+    # 'pixels per metric' calibration variable
+    (cnts, _) = contours.sort_contours(cnts)
+    pixelsPerMetric = None
+    # loop over the contours individually
+    for c in cnts:
+        # if the contour is not sufficiently large, ignore it
+        if cv2.contourArea(c) < 10:
+            continue
+
+        # compute the rotated bounding box of the contour
+        orig = image.copy()
+        box = cv2.minAreaRect(c)
+        box = cv2.cv.BoxPoints(box) if imutils.is_cv2() else cv2.boxPoints(box)
+        box = np.array(box, dtype="int")
+
+        # order the points in the contour such that they appear
+        # in top-left, top-right, bottom-right, and bottom-left
+        # order, then draw the outline of the rotated bounding
+        # box
+        box = perspective.order_points(box)
+        cv2.drawContours(orig, [box.astype("int")], -1, (0, 255, 0), 2)
+
+        # loop over the original points and draw them
+        for (x, y) in box:
+            cv2.circle(orig, (int(x), int(y)), 5, (0, 0, 255), -1)
+        # unpack the ordered bounding box, then compute the midpoint
+        # between the top-left and top-right coordinates, followed by
+        # the midpoint between bottom-left and bottom-right coordinates
+        (tl, tr, br, bl) = box
+        (tltrX, tltrY) = midpoint(tl, tr)
+        (blbrX, blbrY) = midpoint(bl, br)
+
+        # compute the midpoint between the top-left and top-right points,
+        # followed by the midpoint between the top-righ and bottom-right
+        (tlblX, tlblY) = midpoint(tl, bl)
+        (trbrX, trbrY) = midpoint(tr, br)
+
+        # draw the midpoints on the image
+        cv2.circle(orig, (int(tltrX), int(tltrY)), 5, (255, 0, 0), -1)
+        cv2.circle(orig, (int(blbrX), int(blbrY)), 5, (255, 0, 0), -1)
+        cv2.circle(orig, (int(tlblX), int(tlblY)), 5, (255, 0, 0), -1)
+        cv2.circle(orig, (int(trbrX), int(trbrY)), 5, (255, 0, 0), -1)
+
+        # draw lines between the midpoints
+        cv2.line(orig, (int(tltrX), int(tltrY)), (int(blbrX), int(blbrY)),
+                 (255, 0, 255), 2)
+        cv2.line(orig, (int(tlblX), int(tlblY)), (int(trbrX), int(trbrY)),
+                 (255, 0, 255), 2)
+
+        # compute the Euclidean distance between the midpoints
+        dA = dist.euclidean((tltrX, tltrY), (blbrX, blbrY))
+        dB = dist.euclidean((tlblX, tlblY), (trbrX, trbrY))
+
+        # if the pixels per metric has not been initialized, then
+        # compute it as the ratio of pixels to supplied metric
+        # (in this case, inches)
+        if pixelsPerMetric is None:
+            pixelsPerMetric = dB / width
+
+        # compute the size of the object
+        dimA = dA / pixelsPerMetric
+        dimB = dB / pixelsPerMetric
+
+        # draw the object sizes on the image
+        cv2.putText(orig, "{:.1f}in".format(dimA),
+                    (int(tltrX - 15), int(tltrY - 10)), cv2.FONT_HERSHEY_SIMPLEX,
+                    0.65, (255, 255, 255), 2)
+        cv2.putText(orig, "{:.1f}in".format(dimB),
+                    (int(trbrX + 10), int(trbrY)), cv2.FONT_HERSHEY_SIMPLEX,
+                    0.65, (255, 255, 255), 2)
+
+        # show the output image
+        cv2.imshow("Image", orig)
+        cv2.waitKey(0)
+
+
 def result():
     scale = 4
     plt.figure()
     ##xcr изображения
-    #xcr = xcr_values("data/h400x300.xcr")
+    # xcr = xcr_values("data/h400x300.xcr")
     # picture = img_values("data/grace.jpg")
     # plt.imshow(picture, cmap='gray')
     # plt.figure()
@@ -458,11 +577,11 @@ def result():
     # plt.subplot(gs[1, 1])
     # plt.imshow(average_filter(normalize(salt_pepper(picture), 5)), cmap='gray')
 
-    #2D Фурье
+    # 2D Фурье
     # picture = to_one_channel(img_values("data/image2.jpg"))
     # image_restoration(picture)
 
-    #Искажение изображения. Выделение 3ки
+    # Искажение изображения. Выделение 3ки
     # picture = dat_2D_reader("data/blur307x221D.dat")
     # image_distortion_noise(picture)
     # plt.show()
@@ -500,8 +619,7 @@ def result():
     # plt.subplot(gs[2, 2])
     # edge_detection(sp, "hpf")
 
-
-    #выделение границ (Лапласиан, гралиент (Собель))
+    # выделение границ (Лапласиан, гралиент (Собель))
     # picture = to_one_channel(img_values("data/MODEL.jpg"))
     # plt.imshow(picture, cmap='gray')
     # plt.title('Исходное изображение')
@@ -519,3 +637,7 @@ def result():
     # erosionDilation(rnd_noise(picture))
     # plt.show()
     # erosionDilation(salt_pepper(picture))
+
+    # Поиск камня размера n. Размер камня = 6
+    picture = to_one_channel(img_values("data/stones.jpg"))
+    stonesSearch(picture, 0.006)
